@@ -1,0 +1,31 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="user-scalable=no, width=device-width" />
+    <link rel="stylesheet" type="text/css" href="./style/main.css" />
+    <title>tumblr photos viewer</title>
+  </head>
+  <body>
+    <h1>tumblr photos viewer</h1>
+    <fieldset>
+      <legend><label for="tumblr_username">Form</label></legend>
+      <form action="./post-method" method="POST">
+        <fieldset>
+          <legend><label for="tumblr_username">Tumblr username</label></legend>
+          <input type="text" value="" id="tumblr_username" />
+        </fieldset>
+        <input type="submit" value="submit" />
+      </form>
+    </fieldset>
+    <section id="result">
+    </section>
+    <section id="_template">
+      <h1 class="title"></h1>
+      <p class="photo"></p>
+    </section>
+    <script type="application/javascript" src="./script/lib.js"></script>
+    <script type="application/javascript" src="./script/PhotosViewer.js"></script>
+    <script type="application/javascript">new PhotosViewer();</script>
+  </body>
+</html>

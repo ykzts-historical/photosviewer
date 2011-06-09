@@ -1,0 +1,17 @@
+Options +Indexes
+
+AddCharset utf-8 html
+
+<Files ~ "\.js\.gz$">
+  ForceType application/javascript
+  AddEncoding x-gzip gz
+</Files>
+
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !^/old
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^[^.]+ / [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^old/[^.]+ /old/ [L]
