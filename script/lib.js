@@ -159,9 +159,10 @@ URIRules = (function() {
     return this;
   };
   URIRules.prototype.change = function(path) {
-    var func, re, res, title, _i, _len, _ref, _ref2;
+    var func, pathname, re, res, title, _i, _len, _ref, _ref2;
+    pathname = location.pathname + (location.search || '');
     path = this.get_fullpath(path);
-    if (window.history.pushState != null) {
+    if (path !== pathname) {
       window.history.pushState({}, null, path);
     }
     _ref = this.path_rules;

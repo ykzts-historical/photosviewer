@@ -31,13 +31,16 @@ class PhotosViewer
     return
 
   add_event: ->
+    window.addEventListener('popstate', ->
+      pathname = location.pathname + (location.search or '')
+      self.init()
+      self.change(pathname)
+      return
+    , false)
     document.addEventListener('DOMContentLoaded', self.loaded, false)
     return
 
   loaded: ->
-    pathname = location.pathname + (location.search or '')
-    self.change(pathname)
-
     form = document.getElementsByTagName('form').item(0)
     text_field = document.getElementById('tumblr_username')
     text_field.value = self.username if self.username

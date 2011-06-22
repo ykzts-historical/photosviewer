@@ -25,12 +25,16 @@ PhotosViewer = (function() {
     return;
   }
   PhotosViewer.prototype.add_event = function() {
+    window.addEventListener('popstate', function() {
+      var pathname;
+      pathname = location.pathname + (location.search || '');
+      self.init();
+      self.change(pathname);
+    }, false);
     document.addEventListener('DOMContentLoaded', self.loaded, false);
   };
   PhotosViewer.prototype.loaded = function() {
-    var form, pathname, text_field;
-    pathname = location.pathname + (location.search || '');
-    self.change(pathname);
+    var form, text_field;
     form = document.getElementsByTagName('form').item(0);
     text_field = document.getElementById('tumblr_username');
     if (self.username) {

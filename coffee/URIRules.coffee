@@ -21,8 +21,10 @@ class URIRules
     return this
 
   change: (path) ->
+    pathname = location.pathname + (location.search or '')
     path = this.get_fullpath(path)
-    window.history.pushState({}, null, path) if window.history.pushState?
+    unless path is pathname
+      window.history.pushState({}, null, path)
     for [re, func] in this.path_rules
       res = re.exec(path)
       if res
