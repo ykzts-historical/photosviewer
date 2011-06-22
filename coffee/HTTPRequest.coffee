@@ -66,13 +66,26 @@ class HTTPRequest
 
     return
 
-  jsonp_request: (callback) ->
+  jsonp_request: (callback, timeout_time, timeout_func) ->
+    timeout_time = timeout_time or 5 * 1000
+    timeout_func = timeout_func or ->
+      alert('timeout!')
+      return
     func_name = '______calback_' + (new Date()).getTime()
     uri = this.uri + (if '?' in this.uri then '&' else '?') + 'callback=' + func_name
+
+    t = ->
+      timeout_func()
+      delete window[func_name]
+      return
+
     window[func_name] = (json) ->
       callback(json)
       delete window[func_name]
+      window.crearTimeout(t)
       return
+
+    window.setTimeout(t, timeout_time)
 
     script_elem = document.createElement('script')
     script_elem.setAttribute('type', 'application/javascript')
