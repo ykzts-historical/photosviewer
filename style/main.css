@@ -64,16 +64,10 @@ body > h1 + fieldset input[type="text"] {
 }
 
 #result > section {
-  /*display: none;*/
-
   width: 100%;
 
   margin: 0;
   padding-top: 1em;
-}
-
-#result > section:target {
-  display: block;
 }
 
 #result > section h1 {
@@ -97,6 +91,20 @@ body > h1 + fieldset input[type="text"] {
   box-shadow: .4em .4em .4em gray;
 
   background-color: white;
+}
+
+#result > p {
+  width: 95%;
+
+  margin: 1em auto;
+  padding: .3em;
+
+  border: thin solid black;
+  border-radius: .3em;
+
+  background-color: white;
+
+  font-size: 2em;
 }
 
 #_template {
