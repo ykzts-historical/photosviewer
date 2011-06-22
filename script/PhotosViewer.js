@@ -56,16 +56,19 @@ PhotosViewer = (function() {
   };
   PhotosViewer.prototype.request_tumblr = function(username, page) {
     var tumblr;
+    self.output_result('loading...');
     tumblr = new Tumblr(username);
     tumblr.page = page || 1;
     tumblr.type = 'photo';
     tumblr.num = 10;
     tumblr.callback = function(json) {
+      self.delete_message();
       self.output_result(json.posts);
       window.addEventListener('scroll', self.scroll, false);
     };
     tumblr.timeout = 2 * 1000;
     tumblr.ontimeout = function() {
+      self.delete_message();
       self.output_result('timeout...');
     };
     tumblr.send_request();
@@ -78,7 +81,7 @@ PhotosViewer = (function() {
         self.output_result_for_posts(arg);
         break;
       case 'string':
-        node = h.html('p', arg);
+        node = h.html('p', [h.html('@class', 'message'), arg]);
         self.result.appendChild(node);
     }
   };
@@ -101,6 +104,11 @@ PhotosViewer = (function() {
       }, false);
       self.result.appendChild(section);
     }
+  };
+  PhotosViewer.prototype.delete_message = function() {
+    var message;
+    message = self.result.getElementsByClassName('message').item(0);
+    message.parentNode.removeChild(message);
   };
   PhotosViewer.prototype.scroll = function() {
     var root_node;

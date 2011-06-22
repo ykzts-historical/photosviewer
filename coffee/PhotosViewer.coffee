@@ -60,16 +60,19 @@ class PhotosViewer
     return
 
   request_tumblr: (username, page) ->
+    self.output_result('loading...')
     tumblr = new Tumblr(username)
     tumblr.page = page or 1
     tumblr.type = 'photo'
     tumblr.num = 10
     tumblr.callback = (json) ->
+      self.delete_message()
       self.output_result(json.posts)
       window.addEventListener('scroll', self.scroll, false)
       return
     tumblr.timeout = 2 * 1000
     tumblr.ontimeout = ->
+      self.delete_message()
       self.output_result('timeout...')
       return
     tumblr.send_request()
@@ -81,7 +84,10 @@ class PhotosViewer
       when 'object'
         self.output_result_for_posts(arg)
       when 'string'
-        node = h.html('p', arg)
+        node = h.html('p', [
+          h.html('@class', 'message')
+          arg
+        ])
         self.result.appendChild(node)
     return
 
@@ -106,6 +112,11 @@ class PhotosViewer
         return 
       , false)
       self.result.appendChild(section)
+    return
+
+  delete_message: ->
+    message = self.result.getElementsByClassName('message').item(0)
+    message.parentNode.removeChild(message)
     return
 
   scroll: ->
