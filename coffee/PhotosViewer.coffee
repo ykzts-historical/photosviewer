@@ -116,13 +116,13 @@ class PhotosViewer
 
   delete_message: ->
     message = self.result.getElementsByClassName('message').item(0)
-    message.parentNode.removeChild(message)
+    message.parentNode.removeChild(message) if message
     return
 
   scroll: ->
-    root_node = document.lastChild
-    return if root_node.offsetHeight - \
-      window.innerHeight - window.scrollY  >= 200
+    sections = self.result.getElementsByTagName('section')
+    return if sections.length is 0 or \
+      window.scrollY < sections.item(sections.length-2).offsetTop
     window.removeEventListener('scroll', arguments.callee)
     self.change(self.get_uri(self.username, self.page + 1))
     return

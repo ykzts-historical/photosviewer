@@ -108,12 +108,14 @@ PhotosViewer = (function() {
   PhotosViewer.prototype.delete_message = function() {
     var message;
     message = self.result.getElementsByClassName('message').item(0);
-    message.parentNode.removeChild(message);
+    if (message) {
+      message.parentNode.removeChild(message);
+    }
   };
   PhotosViewer.prototype.scroll = function() {
-    var root_node;
-    root_node = document.lastChild;
-    if (root_node.offsetHeight - window.innerHeight - window.scrollY >= 200) {
+    var sections;
+    sections = self.result.getElementsByTagName('section');
+    if (sections.length === 0 || window.scrollY < sections.item(sections.length - 2).offsetTop) {
       return;
     }
     window.removeEventListener('scroll', arguments.callee);
