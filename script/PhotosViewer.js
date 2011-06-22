@@ -37,15 +37,15 @@ PhotosViewer = (function() {
       text_field.value = self.username;
     }
     form.onsubmit = function() {
-      window.removeEventListener('scroll', self.scroll, false);
+      self.init();
       text_field.blur();
       self.username = text_field.value;
-      self.init();
       self.change(self.get_uri(self.username));
       return false;
     };
   };
   PhotosViewer.prototype.init = function() {
+    window.removeEventListener('scroll', self.scroll, false);
     while (self.result.hasChildNodes()) {
       self.result.removeChild(self.result.firstChild);
     }

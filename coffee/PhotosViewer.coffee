@@ -42,16 +42,16 @@ class PhotosViewer
     text_field = document.getElementById('tumblr_username')
     text_field.value = self.username if self.username
     form.onsubmit = ->
-      window.removeEventListener('scroll', self.scroll, false)
+      self.init()
       text_field.blur()
       self.username = text_field.value
-      self.init()
       self.change(self.get_uri(self.username))
       return false
 
     return
 
   init: ->
+    window.removeEventListener('scroll', self.scroll, false)
     while self.result.hasChildNodes()
       self.result.removeChild(self.result.firstChild)
     return
