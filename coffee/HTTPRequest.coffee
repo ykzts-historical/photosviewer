@@ -4,6 +4,9 @@ class HTTPRequest
     this.node_http = if require? then require('http') else null
     this.method = 'GET'
     this.uri = null
+    this.timeout = 0
+    this.ontimeout = ->
+      return
     this.status = null
     this.readyState = 0
     this.onreadystatechange = ->
@@ -66,24 +69,21 @@ class HTTPRequest
 
     return
 
-  jsonp_request: (callback, timeout_time, timeout_func) ->
-    timeout_time = timeout_time or 5 * 1000
-    timeout_func = timeout_func or ->
-      alert('timeout!')
-      return
+  jsonp_request: (callback) ->
     func_name = '______calback_' + (new Date()).getTime()
     uri = this.uri + (if '?' in this.uri then '&' else '?') + 'callback=' + func_name
 
-    timeout_id = window.setTimeout(->
-      timeout_func()
-      delete window[func_name]
-      return
-    , timeout_time)
+    if this.timeout
+      timeout_id = window.setTimeout(->
+        this.ontimeout()
+        delete window[func_name]
+        return
+      , this.timeout)
 
     window[func_name] = (json) ->
       callback(json)
       delete window[func_name]
-      window.clearTimeout(timeout_id)
+      window.clearTimeout(timeout_id) if this.timeout
       return
 
     script_elem = document.createElement('script')

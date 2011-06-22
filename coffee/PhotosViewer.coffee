@@ -64,6 +64,11 @@ class PhotosViewer
     tumblr.callback = (json) ->
       self.output_result(json.posts)
       window.addEventListener('scroll', self.scroll, false)
+      return
+    tumblr.timeout = 2 * 1000
+    tumblr.ontimeout = ->
+      self.output_result('timeout...')
+      return
     tumblr.send_request()
     return
 

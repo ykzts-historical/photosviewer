@@ -58,7 +58,11 @@ PhotosViewer = (function() {
     tumblr.num = 10;
     tumblr.callback = function(json) {
       self.output_result(json.posts);
-      return window.addEventListener('scroll', self.scroll, false);
+      window.addEventListener('scroll', self.scroll, false);
+    };
+    tumblr.timeout = 2 * 1000;
+    tumblr.ontimeout = function() {
+      self.output_result('timeout...');
     };
     tumblr.send_request();
   };

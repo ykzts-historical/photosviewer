@@ -6,6 +6,9 @@ class Tumblr
     this.type = ''
     this.num = 100
     this.callback = null
+    this.timeout = 0
+    this.ontimeout = ->
+      return
 
     return
 
@@ -27,6 +30,9 @@ class Tumblr
       callback(json)
       return
     req.open('GET', uri)
+    if this.timeout
+      req.timeout = this.timeout
+      req.ontimeout = this.ontimeout
     req.send(null)
 
     return

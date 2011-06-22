@@ -10,6 +10,8 @@ HTTPRequest = (function() {
     this.node_http = typeof require !== "undefined" && require !== null ? require('http') : null;
     this.method = 'GET';
     this.uri = null;
+    this.timeout = 0;
+    this.ontimeout = function() {};
     this.status = null;
     this.readyState = 0;
     this.onreadystatechange = function() {};
@@ -61,22 +63,22 @@ HTTPRequest = (function() {
     });
     req.end();
   };
-  HTTPRequest.prototype.jsonp_request = function(callback, timeout_time, timeout_func) {
+  HTTPRequest.prototype.jsonp_request = function(callback) {
     var func_name, script_elem, timeout_id, uri;
-    timeout_time = timeout_time || 5 * 1000;
-    timeout_func = timeout_func || function() {
-      alert('timeout!');
-    };
     func_name = '______calback_' + (new Date()).getTime();
     uri = this.uri + (__indexOf.call(this.uri, '?') >= 0 ? '&' : '?') + 'callback=' + func_name;
-    timeout_id = window.setTimeout(function() {
-      timeout_func();
-      delete window[func_name];
-    }, timeout_time);
+    if (this.timeout) {
+      timeout_id = window.setTimeout(function() {
+        this.ontimeout();
+        delete window[func_name];
+      }, this.timeout);
+    }
     window[func_name] = function(json) {
       callback(json);
       delete window[func_name];
-      window.clearTimeout(timeout_id);
+      if (this.timeout) {
+        window.clearTimeout(timeout_id);
+      }
     };
     script_elem = document.createElement('script');
     script_elem.setAttribute('type', 'application/javascript');
@@ -195,6 +197,8 @@ Tumblr = (function() {
     this.type = '';
     this.num = 100;
     this.callback = null;
+    this.timeout = 0;
+    this.ontimeout = function() {};
     return;
   }
   Tumblr.prototype.send_request = function() {
@@ -219,6 +223,10 @@ Tumblr = (function() {
       callback(json);
     };
     req.open('GET', uri);
+    if (this.timeout) {
+      req.timeout = this.timeout;
+      req.ontimeout = this.ontimeout;
+    }
     req.send(null);
   };
   Tumblr.prototype.api_uri = function(start) {
