@@ -64,19 +64,20 @@ HTTPRequest = (function() {
     req.end();
   };
   HTTPRequest.prototype.jsonp_request = function(callback) {
-    var func_name, script_elem, timeout_id, uri;
+    var func_name, script_elem, self, timeout_id, uri;
+    self = this;
     func_name = '______calback_' + (new Date()).getTime();
     uri = this.uri + (__indexOf.call(this.uri, '?') >= 0 ? '&' : '?') + 'callback=' + func_name;
     if (this.timeout) {
       timeout_id = window.setTimeout(function() {
-        this.ontimeout();
+        self.ontimeout();
         delete window[func_name];
       }, this.timeout);
     }
     window[func_name] = function(json) {
       callback(json);
       delete window[func_name];
-      if (this.timeout) {
+      if (self.timeout) {
         window.clearTimeout(timeout_id);
       }
     };

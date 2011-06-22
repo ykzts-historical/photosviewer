@@ -70,12 +70,13 @@ class HTTPRequest
     return
 
   jsonp_request: (callback) ->
+    self = this
     func_name = '______calback_' + (new Date()).getTime()
     uri = this.uri + (if '?' in this.uri then '&' else '?') + 'callback=' + func_name
 
     if this.timeout
       timeout_id = window.setTimeout(->
-        this.ontimeout()
+        self.ontimeout()
         delete window[func_name]
         return
       , this.timeout)
@@ -83,7 +84,7 @@ class HTTPRequest
     window[func_name] = (json) ->
       callback(json)
       delete window[func_name]
-      window.clearTimeout(timeout_id) if this.timeout
+      window.clearTimeout(timeout_id) if self.timeout
       return
 
     script_elem = document.createElement('script')
