@@ -74,18 +74,17 @@ class HTTPRequest
     func_name = '______calback_' + (new Date()).getTime()
     uri = this.uri + (if '?' in this.uri then '&' else '?') + 'callback=' + func_name
 
-    t = ->
+    timeout_id = window.setTimeout(->
       timeout_func()
       delete window[func_name]
       return
+    , timeout_time)
 
     window[func_name] = (json) ->
       callback(json)
       delete window[func_name]
-      window.crearTimeout(t)
+      window.clearTimeout(timeout_id)
       return
-
-    window.setTimeout(t, timeout_time)
 
     script_elem = document.createElement('script')
     script_elem.setAttribute('type', 'application/javascript')

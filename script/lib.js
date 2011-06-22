@@ -62,23 +62,22 @@ HTTPRequest = (function() {
     req.end();
   };
   HTTPRequest.prototype.jsonp_request = function(callback, timeout_time, timeout_func) {
-    var func_name, script_elem, t, uri;
+    var func_name, script_elem, timeout_id, uri;
     timeout_time = timeout_time || 5 * 1000;
     timeout_func = timeout_func || function() {
       alert('timeout!');
     };
     func_name = '______calback_' + (new Date()).getTime();
     uri = this.uri + (__indexOf.call(this.uri, '?') >= 0 ? '&' : '?') + 'callback=' + func_name;
-    t = function() {
+    timeout_id = window.setTimeout(function() {
       timeout_func();
       delete window[func_name];
-    };
+    }, timeout_time);
     window[func_name] = function(json) {
       callback(json);
       delete window[func_name];
-      window.crearTimeout(t);
+      window.clearTimeout(timeout_id);
     };
-    window.setTimeout(t, timeout_time);
     script_elem = document.createElement('script');
     script_elem.setAttribute('type', 'application/javascript');
     script_elem.setAttribute('src', uri);
