@@ -64,26 +64,30 @@ HTTPRequest = (function() {
     req.end();
   };
   HTTPRequest.prototype.jsonp_request = function(callback) {
-    var func_name, script_elem, self, timeout_id, uri;
+    var finish, func_name, script_elem, self, timeout_id, uri;
     self = this;
     func_name = '______calback_' + (new Date()).getTime();
     uri = this.uri + (__indexOf.call(this.uri, '?') >= 0 ? '&' : '?') + 'callback=' + func_name;
+    script_elem = document.createElement('script');
+    script_elem.setAttribute('type', 'application/javascript');
+    script_elem.setAttribute('src', uri);
+    finish = function() {
+      delete window[func_name];
+      return script_elem.parentNode.removeChild(script_elem);
+    };
     if (this.timeout) {
       timeout_id = window.setTimeout(function() {
         self.ontimeout();
-        delete window[func_name];
+        finish();
       }, this.timeout);
     }
     window[func_name] = function(json) {
       callback(json);
-      delete window[func_name];
+      finish();
       if (self.timeout) {
         window.clearTimeout(timeout_id);
       }
     };
-    script_elem = document.createElement('script');
-    script_elem.setAttribute('type', 'application/javascript');
-    script_elem.setAttribute('src', uri);
     document.getElementsByTagName('body').item(0).appendChild(script_elem);
   };
   return HTTPRequest;

@@ -74,22 +74,27 @@ class HTTPRequest
     func_name = '______calback_' + (new Date()).getTime()
     uri = this.uri + (if '?' in this.uri then '&' else '?') + 'callback=' + func_name
 
+    script_elem = document.createElement('script')
+    script_elem.setAttribute('type', 'application/javascript')
+    script_elem.setAttribute('src', uri)
+
+    finish = ->
+      delete window[func_name]
+      script_elem.parentNode.removeChild(script_elem)
+
     if this.timeout
       timeout_id = window.setTimeout(->
         self.ontimeout()
-        delete window[func_name]
+        finish()
         return
       , this.timeout)
 
     window[func_name] = (json) ->
       callback(json)
-      delete window[func_name]
+      finish()
       window.clearTimeout(timeout_id) if self.timeout
       return
 
-    script_elem = document.createElement('script')
-    script_elem.setAttribute('type', 'application/javascript')
-    script_elem.setAttribute('src', uri)
     document.getElementsByTagName('body').item(0).appendChild(script_elem)
 
     return
