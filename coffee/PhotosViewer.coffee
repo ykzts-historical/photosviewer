@@ -8,6 +8,8 @@ class PhotosViewer
     self.username = null
     self.page = null
 
+    self.cache = {}
+
     self.result = document.getElementById('result')
 
     self.html_maker = new HTMLMaker(document)
@@ -31,16 +33,13 @@ class PhotosViewer
     return
 
   add_event: ->
-    window.addEventListener('popstate', ->
-      pathname = location.pathname + (location.search or '')
-      self.init()
-      self.change(pathname)
-      return
-    , false)
+    window.addEventListener('popstate', self.popstate, false)
     document.addEventListener('DOMContentLoaded', self.loaded, false)
     return
 
   loaded: ->
+    self.start()
+
     form = document.getElementsByTagName('form').item(0)
     text_field = document.getElementById('tumblr_username')
     text_field.value = self.username if self.username
@@ -53,6 +52,16 @@ class PhotosViewer
 
     return
 
+  popstate: ->
+    self.start()
+    return
+
+  start: ->
+    pathname = location.pathname + (location.search or '')
+    self.init()
+    self.change(pathname)
+    return
+
   init: ->
     window.removeEventListener('scroll', self.scroll, false)
     while self.result.hasChildNodes()
@@ -61,24 +70,36 @@ class PhotosViewer
 
   request_tumblr: (username, page) ->
     self.output_result('loading...')
+
+    unless self.cache[username]
+      self.cache[username] = {}
+    if self.cache[username][page]
+      self.append_posts(self.cache[username][page])
+      return
+
     tumblr = new Tumblr(username)
-    tumblr.page = page or 1
+    tumblr.page = page or '1'
     tumblr.type = 'photo'
     tumblr.num = 10
     tumblr.callback = (json) ->
-      self.delete_message()
-      self.output_result(json.posts)
-      window.addEventListener('scroll', self.scroll, false)
+      self.cache[username][page] = json.posts
+      self.append_posts(self.cache[username][page])
       return
     tumblr.timeout = 2 * 1000
     tumblr.ontimeout = ->
-      self.delete_message()
       self.output_result('timeout...')
       return
     tumblr.send_request()
     return
 
+  append_posts: (posts) ->
+    self.output_result(posts)
+    window.addEventListener('scroll', self.scroll, false)
+    return
+
   output_result: (arg) ->
+    self.delete_message()
+
     h = self.html_maker
     switch typeof arg
       when 'object'

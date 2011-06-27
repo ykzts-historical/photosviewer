@@ -6,6 +6,7 @@ PhotosViewer = (function() {
     self = this;
     self.username = null;
     self.page = null;
+    self.cache = {};
     self.result = document.getElementById('result');
     self.html_maker = new HTMLMaker(document);
     self.uri_rules = new URIRules();
@@ -25,16 +26,12 @@ PhotosViewer = (function() {
     return;
   }
   PhotosViewer.prototype.add_event = function() {
-    window.addEventListener('popstate', function() {
-      var pathname;
-      pathname = location.pathname + (location.search || '');
-      self.init();
-      self.change(pathname);
-    }, false);
+    window.addEventListener('popstate', self.popstate, false);
     document.addEventListener('DOMContentLoaded', self.loaded, false);
   };
   PhotosViewer.prototype.loaded = function() {
     var form, text_field;
+    self.start();
     form = document.getElementsByTagName('form').item(0);
     text_field = document.getElementById('tumblr_username');
     if (self.username) {
@@ -48,6 +45,15 @@ PhotosViewer = (function() {
       return false;
     };
   };
+  PhotosViewer.prototype.popstate = function() {
+    self.start();
+  };
+  PhotosViewer.prototype.start = function() {
+    var pathname;
+    pathname = location.pathname + (location.search || '');
+    self.init();
+    self.change(pathname);
+  };
   PhotosViewer.prototype.init = function() {
     window.removeEventListener('scroll', self.scroll, false);
     while (self.result.hasChildNodes()) {
@@ -57,24 +63,34 @@ PhotosViewer = (function() {
   PhotosViewer.prototype.request_tumblr = function(username, page) {
     var tumblr;
     self.output_result('loading...');
+    if (!self.cache[username]) {
+      self.cache[username] = {};
+    }
+    if (self.cache[username][page]) {
+      self.append_posts(self.cache[username][page]);
+      return;
+    }
     tumblr = new Tumblr(username);
-    tumblr.page = page || 1;
+    tumblr.page = page || '1';
     tumblr.type = 'photo';
     tumblr.num = 10;
     tumblr.callback = function(json) {
-      self.delete_message();
-      self.output_result(json.posts);
-      window.addEventListener('scroll', self.scroll, false);
+      self.cache[username][page] = json.posts;
+      self.append_posts(self.cache[username][page]);
     };
     tumblr.timeout = 2 * 1000;
     tumblr.ontimeout = function() {
-      self.delete_message();
       self.output_result('timeout...');
     };
     tumblr.send_request();
   };
+  PhotosViewer.prototype.append_posts = function(posts) {
+    self.output_result(posts);
+    window.addEventListener('scroll', self.scroll, false);
+  };
   PhotosViewer.prototype.output_result = function(arg) {
     var h, node;
+    self.delete_message();
     h = self.html_maker;
     switch (typeof arg) {
       case 'object':
