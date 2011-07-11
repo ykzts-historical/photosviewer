@@ -4,6 +4,7 @@ PhotosViewer = (function() {
   self = null;
   function PhotosViewer() {
     self = this;
+    self.pathname = '/';
     self.username = null;
     self.page = null;
     self.cache = {};
@@ -17,7 +18,7 @@ PhotosViewer = (function() {
       self.username = username;
       self.page = (page || 1) * 1;
       self.request_tumblr(self.username, self.page);
-      return "" + self.page + " > " + self.username + " > tumblr photos viewer";
+      return "" + self.page + " < " + self.username + " < tumblr photos viewer";
     });
     self.uri_rules.http404 = function() {
       self.output_result('404 Not found.');
@@ -80,7 +81,9 @@ PhotosViewer = (function() {
     };
     tumblr.timeout = 2 * 1000;
     tumblr.ontimeout = function() {
-      self.output_result('timeout...');
+      var message;
+      message = self.output_result('timeout...');
+      message.addEventListener('click', self.reload, false);
     };
     tumblr.send_request();
   };
@@ -90,16 +93,18 @@ PhotosViewer = (function() {
   };
   PhotosViewer.prototype.output_result = function(arg) {
     var h, node;
+    node = null;
     self.delete_message();
     h = self.html_maker;
     switch (typeof arg) {
       case 'object':
         self.output_result_for_posts(arg);
-        break;
+        return;
       case 'string':
         node = h.html('p', [h.html('@class', 'message'), arg]);
         self.result.appendChild(node);
     }
+    return node;
   };
   PhotosViewer.prototype.output_result_for_posts = function(posts) {
     var h, i, photo, post, section, title, _len;
@@ -138,7 +143,11 @@ PhotosViewer = (function() {
     self.change(self.get_uri(self.username, self.page + 1));
   };
   PhotosViewer.prototype.change = function(uri) {
+    self.pathname = uri;
     self.uri_rules.change(uri);
+  };
+  PhotosViewer.prototype.reload = function() {
+    self.change(self.pathname);
   };
   PhotosViewer.prototype.get_uri = function(username, page) {
     var uri;

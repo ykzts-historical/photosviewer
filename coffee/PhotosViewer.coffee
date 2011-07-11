@@ -5,6 +5,8 @@ class PhotosViewer
   constructor: ->
     self = this
 
+    self.pathname = '/'
+
     self.username = null
     self.page = null
 
@@ -22,7 +24,7 @@ class PhotosViewer
       self.username = username
       self.page = (page or 1) * 1
       self.request_tumblr(self.username, self.page)
-      return "#{self.page} > #{self.username} > tumblr photos viewer"
+      return "#{self.page} < #{self.username} < tumblr photos viewer"
     )
     self.uri_rules.http404 = ->
       self.output_result('404 Not found.')
@@ -87,7 +89,8 @@ class PhotosViewer
       return
     tumblr.timeout = 2 * 1000
     tumblr.ontimeout = ->
-      self.output_result('timeout...')
+      message = self.output_result('timeout...')
+      message.addEventListener('click', self.reload, false)
       return
     tumblr.send_request()
     return
@@ -98,19 +101,22 @@ class PhotosViewer
     return
 
   output_result: (arg) ->
+    node = null
+
     self.delete_message()
 
     h = self.html_maker
     switch typeof arg
       when 'object'
         self.output_result_for_posts(arg)
+        return
       when 'string'
         node = h.html('p', [
           h.html('@class', 'message')
           arg
         ])
         self.result.appendChild(node)
-    return
+    return node
 
   output_result_for_posts: (posts) ->
     h = self.html_maker
@@ -149,7 +155,12 @@ class PhotosViewer
     return
 
   change: (uri) ->
+    self.pathname = uri
     self.uri_rules.change(uri)
+    return
+
+  reload: ->
+    self.change(self.pathname)
     return
 
   get_uri: (username, page) ->
